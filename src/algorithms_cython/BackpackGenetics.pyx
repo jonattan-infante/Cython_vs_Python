@@ -1,40 +1,49 @@
+#cython: language_level=3
 import numpy as np
 
-
-class BackPack:
+cdef class BackPack:
+    cdef public list gen
+    cdef list weight
+    cdef public int fitness
     def __init__(self, gen):
         self.gen = gen
         self.weight = [3, 7, 4, 1, 5, 4, 2, 3]
-        self.fitness = sum(self.gen * self.weight)
+        self.fitness = self.sum_fitness()
+    cdef sum_fitness(self):
+        return sum([self.gen[i]*self.weight[i] for i in range(len(self.gen))])
+
+cpdef setting(int init_population):
+    cdef int i
+    return [BackPack(list(np.random.randint(2, size=8))) for i in range(init_population)]
 
 
-def setting(init_population):
-    return [BackPack(np.random.randint(2, size=8)) for i in range(init_population)]
-
-
-def average_population_assessment(population):
+cpdef average_population_assessment(population):
+    cdef BackPack i
     return np.mean([i.fitness for i in population])
 
 
-def max_population_assessment(population):
-    index = np.argmax([i.fitness for i in population])
+cpdef max_population_assessment(population):
+    cdef BackPack i
+    cdef int index = np.argmax([i.fitness for i in population])
     return population[index]
 
 
-def select_parents(population):
+cpdef select_parents(population):
+    cdef BackPack i
     total_point = sum([i.fitness for i in population])
     probability = [i.fitness / total_point for i in population]
     parents = np.random.choice(population, p=probability, size=int(len(population) / 2) + 10, replace=False)
     return parents
 
 
-def mutation(gen):
+cpdef mutation(gen):
     gen[len(gen) - 1] = np.random.randint(2)
     gen = np.array(gen)
-    return gen
+    return list(gen)
 
 
-def next_generation(fathers):
+cpdef next_generation(fathers):
+    cdef int i
     new_generation = []
     for i in range(len(fathers) - 1):
         father_one_part_one, father_one_part_two = np.array_split(fathers[i].gen, 2)
@@ -47,6 +56,7 @@ def next_generation(fathers):
 
 
 def algorithm_genetic(generation, number_population):
+    cdef int i
     population = setting(number_population)
     metrics_by_generation = [average_population_assessment(population)]
     for i in range(generation):

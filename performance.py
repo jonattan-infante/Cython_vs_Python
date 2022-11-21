@@ -6,6 +6,7 @@ from src.algorithms_python.BackpackGenetics import algorithm_genetic as algorith
 from src.algorithms_cython.BackpackGenetics import algorithm_genetic as algorithm_genetic_cython
 import time
 
+
 for i in range(30):
     init_time = time.time()
     training_model_cython()
